@@ -1,10 +1,11 @@
 
 var grabBox = $("#grabBox");
 
-var maxWidth, maxHeight, minWidth, minHeight;
 
-var topOffset = $(window).height();
-
+var maxWidth = $(window).width() * .9;
+var maxHeight = $(window).height() * .8;
+var minWidth = $(window).width() - maxWidth;
+var minHeight = $(window).height() - maxHeight;
 
 var glideTime = 700;
 var glideSteps = 50;
@@ -17,22 +18,15 @@ var box = {
     y : minHeight,
     prevX : [0,0,0,0,0,0,0,0,0,0],
     prevY : [0,0,0,0,0,0,0,0,0,0],
-    width : 50,
-    height: 50,
+    width : 25,
+    height: 25,
     clicked: false,
     freefall: 0
-};
+}
 
 $(document).ready(function(){
-    var cont = $("#container");
-    
-    maxWidth = parseInt(cont.css("width"));
-    maxHeight = parseInt(cont.css("height"));
-    minWidth = cont.offset().left;
-    minHeight = cont.offset().top ;
-    
+
     grabBox = $("#grabBox");
-    console.log(maxWidth + " " + maxHeight);
     
     grabBox.on("mousedown", boxClick);
     
@@ -63,41 +57,37 @@ function boxClick(){
 function boxDrag(event){
     box.prevX.push(box.x);
     box.prevY.push(box.y);
-    box.x = event.pageX - box.width / 2;
-    box.y = event.pageY - box.height / 2;
+    box.x = event.pageX;
+    box.y = event.pageY;
 }
 
 function updateBox(){
-    console.log(`updating ${box.x} ${box.y} max:${maxWidth} ${maxHeight} min:${minWidth} ${minHeight}`);
-    if(box.x > maxWidth - box.width)
-        box.x = maxWidth - box.width;
+    console.log(`updating ${box.x} ${box.y}`);
+    if(box.x > maxWidth)
+        box.x = maxWidth;
     else if(box.x < minWidth)
         box.x = minWidth;
     
-    if(box.y > maxHeight - box.height)
-        box.y = maxHeight - box.height;
-    else if(box.y < minHeight){
+    if(box.y > maxHeight)
+        box.y = maxHeight;
+    else if(box.y < minHeight)
         box.y = minHeight;
-        console.log(`setting box.y to ${box.y} == ${minHeight}`)
-    }
 
-    grabBox.css("left", box.x);
-    grabBox.css("top", box.y);
-    grabBox.css("height", box.height + "px");
-    grabBox.css("width", box.width + "px");
+    grabBox.css("left", box.x - 12.5);
+    grabBox.css("top", box.y - 12.5);
 }
 
 function gravityBox(){
 
-    var xSpeed = box.x - box.prevX.pop();
-    var xStep = xSpeed / stepTime;
-    var ySpeed = box.y - box.prevY.pop();
-    var yStep = ySpeed / stepTime;
+    let xSpeed = box.x - box.prevX.pop();
+    let xStep = xSpeed / stepTime;
+    let ySpeed = box.y - box.prevY.pop();
+    let yStep = ySpeed / stepTime;
 
     var gravityInterval = setInterval(function(){
-            if(!box.clicked && box.y < maxHeight - box.height){
-                box.x = (box.x + xSpeed);
-                box.y = (box.y + ySpeed);
+            if(!box.clicked && box.y < maxHeight){
+                box.x = Math.abs((box.x + xSpeed));
+                box.y = Math.abs((box.y + ySpeed));
                 
                 box.prevX.push(box.x);
                 box.prevY.push(box.y);
