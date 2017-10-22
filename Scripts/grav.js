@@ -1,94 +1,102 @@
-
-var grabBox = $("#grabBox");
+var cont = $("#container");
 
 var maxWidth, maxHeight, minWidth, minHeight;
-
-var topOffset = $(window).height();
-
-
-var glideTime = 700;
-var glideSteps = 50;
-
 var gravitySpeed = 2;
 var stepTime = 25;
 
-var box = {
-    x : minWidth,
-    y : minHeight,
-    prevX : [0,0,0,0,0,0,0,0,0,0],
-    prevY : [0,0,0,0,0,0,0,0,0,0],
-    width : 50,
-    height: 50,
-    clicked: false,
-    freefall: 0
-};
+var globalClicked = false;
+var lastClickedBox;
+
+var boxes = Array();
 
 $(document).ready(function(){
-    var cont = $("#container");
+    cont = $("#container");
     
     maxWidth = parseInt(cont.css("width"));
     maxHeight = parseInt(cont.css("height"));
     minWidth = cont.offset().left;
     minHeight = cont.offset().top ;
     
-    grabBox = $("#grabBox");
-    console.log(maxWidth + " " + maxHeight);
     
-    grabBox.on("mousedown", boxClick);
+
+    $(document).on("mousedown", function(){
+        globalClicked = globalClicked ? false : true;
+    });
     
     $(document).on("mousemove", function(event){
-        if(box.clicked){
-            boxDrag(event);
-            updateBox();
+        if(lastClickedBox && lastClickedBox.clicked){
+            boxDrag(lastClickedBox, event);
+            updateBox(lastClickedBox);
         }
     });
     
-    $(document).on("mouseup", function(){
-        if(box.clicked){
+    $(document).on("mouseup", function(event){
+        var n = event.target.id;
+        var box = boxes[n]
+        if(box && box.clicked){
             box.clicked = false;
-            gravityBox();
+            gravityBox(box);
         }
     });
+
+    $(document).on("dblclick", function(event){
+        addRandomBox(event);
+    });
+
 });
 
 
-function boxClick(){
+function addRandomBox(event){
+    var boxSize = Math.random() * 500 + 10;
+    var boxX = Math.random() * maxWidth;
+    var boxY = Math.random() * maxHeight;
+    var arrSize = boxes.length;
+
+    var randBox = {
+        x : event.pageX,
+        y : event.pageY,
+        prevX : [event.pageX],
+        prevY : [event.pageY + 10],
+        width : boxSize,
+        height : boxSize,
+        clicked : false,
+        freefall : 0,
+        id: arrSize
+    };
+
+    var htmlBox = $("<div>", {id : randBox.id, class : "grabBox"});
+    cont.append(htmlBox);
+    
+    boxes.push(randBox);
+    updateBox(randBox);
+    gravityBox(randBox);
+
+    $(".grabBox").on("mousedown", function(){
+        console.log("clicked a doge");
+        var n = $(this).attr("id");
+        var box = boxes[n]
+        boxClick(box);
+    });
+
+    console.log(boxes);
+}
+
+function boxClick(box){
+    lastClickedBox = box;
     box.clicked = true;
     box.freefall = 0;
     box.prevX = [box.x];
     box.prevY = [box.y];
-
 }
 
-function boxDrag(event){
+function boxDrag(box, event){
     box.prevX.push(box.x);
     box.prevY.push(box.y);
     box.x = event.pageX - box.width / 2;
     box.y = event.pageY - box.height / 2;
 }
 
-function updateBox(){
-    console.log(`updating ${box.x} ${box.y} max:${maxWidth} ${maxHeight} min:${minWidth} ${minHeight}`);
-    if(box.x > maxWidth - box.width)
-        box.x = maxWidth - box.width;
-    else if(box.x < minWidth)
-        box.x = minWidth;
-    
-    if(box.y > maxHeight - box.height)
-        box.y = maxHeight - box.height;
-    else if(box.y < minHeight){
-        box.y = minHeight;
-        console.log(`setting box.y to ${box.y} == ${minHeight}`)
-    }
-
-    grabBox.css("left", box.x);
-    grabBox.css("top", box.y);
-    grabBox.css("height", box.height + "px");
-    grabBox.css("width", box.width + "px");
-}
-
-function gravityBox(){
-
+function gravityBox(box){
     var xSpeed = box.x - box.prevX.pop();
     var xStep = xSpeed / stepTime;
     var ySpeed = box.y - box.prevY.pop();
@@ -104,10 +112,28 @@ function gravityBox(){
 
                 box.y += gravitySpeed * box.freefall;
                 box.freefall += 1;
-                updateBox();
+                updateBox(box);
             }
             else{
                 clearInterval(gravityInterval);
             }
         },stepTime);
+}
+
+function updateBox(box){
+    console.log(`updating ${box.x} ${box.y}`);
+    if(box.x > maxWidth - box.width)
+        box.x = maxWidth - box.width;
+    else if(box.x < minWidth)
+        box.x = minWidth;
+    if(box.y > maxHeight - box.height)
+        box.y = maxHeight - box.height;
+    else if(box.y < minHeight)
+        box.y = minHeight;
+
+    var htmlBox = $(`#${box.id}`);
+    htmlBox.css("left", box.x);
+    htmlBox.css("top", box.y);
+    htmlBox.css("height", box.height + "px");
+    htmlBox.css("width", box.width + "px");
 }

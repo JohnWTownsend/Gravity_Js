@@ -8,7 +8,7 @@ h1{
     user-select: none;
 }
 
-#grabBox{
+.grabBox{
     position:fixed;
     background:url("../doge.png") no-repeat;
     background-size:cover;
