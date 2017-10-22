@@ -1,10 +1,14 @@
+*{
+    margin:0px;
+}
+
 h1{
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     text-align: center;
     user-select: none;
 }
 
-#grabBox{
+.grabBox{
     position:fixed;
     background:url("../doge.png") no-repeat;
     background-size:cover;
@@ -14,12 +18,12 @@ h1{
     vertical-align: middle;
     line-height: 100px;
     user-select: none;
-    top:50%;
-    left:50%;
+    top:45%;
+    left:45%;
 }
 
 #container{
     background-color:rgb(60,60,60);
-    height:90%;
+    height:100%;
     width:100%;
 }
