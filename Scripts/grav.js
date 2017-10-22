@@ -24,12 +24,7 @@ var box = {
     freefall: 0
 }
 
-
-
 $(document).ready(function(){
-    box.x = maxWidth / 2.0;
-    box.y = maxHeight / 2.0;
-    updateBox();
 
     grabBox = $("#grabBox");
     
