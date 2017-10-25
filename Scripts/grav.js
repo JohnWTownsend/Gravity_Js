@@ -1,13 +1,14 @@
 var cont = $("#container");
 
 var maxWidth, maxHeight, minWidth, minHeight;
-var gravitySpeed = 2;
+var gravitySpeed = .2;
 var stepTime = 25;
 
 var globalClicked = false;
 var lastClickedBox;
 
 var boxes = Array();
+var upArrows = Array();
 
 $(document).ready(function(){
     cont = $("#container");
@@ -16,7 +17,6 @@ $(document).ready(function(){
     maxHeight = parseInt(cont.css("height"));
     minWidth = cont.offset().left;
     minHeight = cont.offset().top ;
-    
     
 
     $(document).on("mousedown", function(){
@@ -61,7 +61,8 @@ function addRandomBox(event){
         height : boxSize,
         clicked : false,
         freefall : 0,
-        id: arrSize
+        id: arrSize,
+        aboveCont : false
     };
 
     var htmlBox = $("<div>", {id : randBox.id, class : "grabBox"});
@@ -78,7 +79,31 @@ function addRandomBox(event){
         boxClick(box);
     });
 
-    console.log(boxes);
+}
+
+function getRandWord(){
+    var wordsArray = ["wow", "so amaze", "very impress", "such doge", "doing the toss", "where paw fren?", "doggo is thro", "many speed", "so DSU", "doing me the frighten"];
+    var randInd = Math.floor(Math.random()*wordsArray.length);
+    return wordsArray[randInd];
+}
+
+function applyRandStyles(elem){
+    var randFontSize = Math.random() * 100 + 25;
+    var randColor = getRandomColor();
+    var randX = Math.random() * (maxWidth-400) + 100;
+    var randY = Math.random() * (maxHeight-400) + 100;
+
+    elem.css("font-size", randFontSize);
+    elem.css("color", randColor);
+    elem.css("left", randX);
+    elem.css("top", randY);
+}
+
+function addRandomMessage(){
+    var mesg = $("<p>", {class : "message", text: getRandWord()});
+    cont.append(mesg);
+    applyRandStyles(mesg);
+    setTimeout(function(){mesg.remove()}, 5000);
 }
 
 function boxClick(box){
@@ -102,6 +127,10 @@ function gravityBox(box){
     var ySpeed = box.y - box.prevY.pop();
     var yStep = ySpeed / stepTime;
 
+    // if(Math.abs(xSpeed) > 100 || Math.abs(ySpeed) > 100)
+
+    addRandomMessage();
+    
     var gravityInterval = setInterval(function(){
             if(!box.clicked && box.y < maxHeight - box.height){
                 box.x = (box.x + xSpeed);
@@ -121,15 +150,28 @@ function gravityBox(box){
 }
 
 function updateBox(box){
-    console.log(`updating ${box.x} ${box.y}`);
     if(box.x > maxWidth - box.width)
         box.x = maxWidth - box.width;
     else if(box.x < minWidth)
         box.x = minWidth;
+
     if(box.y > maxHeight - box.height)
         box.y = maxHeight - box.height;
-    else if(box.y < minHeight)
-        box.y = minHeight;
+    else if (box.y < minHeight && box.aboveCont) //box above screen and arrow exists
+        upArrows[box.id].css("left", box.x + (box.width/2));
+    else if(box.y < minHeight && !box.aboveCont){  //box above screen and arrow doesn't exist
+        upArrows[box.id] = $(`<div>`, {id: `arrow${box.id}`, class: "upArrow"})
+        upArrows[box.id].css("left", box.x);
+        upArrows[box.id].css("top", minHeight);
+        cont.append(upArrows[box.id]);
+        box.aboveCont = true;
+        console.log("created " + upArrows[box.id]);
+    }
+    else if(box.aboveCont && box.y >= minHeight && upArrows[box.id]){ //box returns to screen
+        console.log("removing");        
+        upArrows[box.id].remove();
+        box.aboveCont = false;
+    }
 
     var htmlBox = $(`#${box.id}`);
     htmlBox.css("left", box.x);

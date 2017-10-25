@@ -6,7 +6,7 @@ $(document).ready(function(){
     window.setInterval(function(){
         cont.css("background-color", getRandomColor());//colors[Math.floor(Math.random() * colors.length)]);
         console.log("color change");
-    }, 50);
+    }, 2500);
 });
 
 
