@@ -1,7 +1,7 @@
 var cont = $("#container");
 
 var maxWidth, maxHeight, minWidth, minHeight;
-var gravitySpeed = .2;
+var gravitySpeed = 2;
 var stepTime = 25;
 
 var globalClicked = false;
